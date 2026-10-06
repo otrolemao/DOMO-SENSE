@@ -18,12 +18,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.domosense.data.models.AirQuality
 import com.example.domosense.ui.components.SensorCard
 import com.example.domosense.ui.theme.DOMOSENSETheme
+import com.example.domosense.ui.theme.DangerOrange
+import com.example.domosense.ui.theme.DangerRed
+import com.example.domosense.ui.theme.WarningYellow
 import com.example.domosense.viewmodel.MainViewModel
 import java.util.Locale
 
@@ -42,6 +47,15 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DashboardScreen(viewModel: MainViewModel = viewModel()) {
     val data by viewModel.sensorData.collectAsState()
+
+    // Determinar color y estado según CO2
+    val calidad = AirQuality.fromCO2(data.co2)
+    val colorCO2 = when (calidad) {
+        AirQuality.OPTIMO -> Color(0xFF00C853)   // Verde
+        AirQuality.REGULAR -> WarningYellow       // Amarillo
+        AirQuality.MALO -> DangerOrange           // Naranja
+        AirQuality.CRITICO -> DangerRed           // Rojo
+    }
 
     Column(
         modifier = Modifier
@@ -93,7 +107,8 @@ fun DashboardScreen(viewModel: MainViewModel = viewModel()) {
             valor = data.co2.toString(),
             unidad = "ppm",
             icono = "🌫️",
-            colorAcento = MaterialTheme.colorScheme.tertiary
+            colorAcento = colorCO2,
+            subtitulo = "Calidad: ${calidad.label}"
         )
     }
 }

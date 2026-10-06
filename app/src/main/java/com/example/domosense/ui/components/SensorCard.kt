@@ -31,6 +31,7 @@ fun SensorCard(
     unidad: String,
     icono: String,
     colorAcento: Color,
+    subtitulo: String? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -47,7 +48,6 @@ fun SensorCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Ícono cuadrado con color de acento
             Box(
                 modifier = Modifier
                     .size(56.dp)
@@ -91,6 +91,16 @@ fun SensorCard(
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
+
+                if (subtitulo != null) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = subtitulo,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = colorAcento
                     )
                 }
             }
