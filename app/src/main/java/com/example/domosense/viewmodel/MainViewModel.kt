@@ -25,11 +25,11 @@ class MainViewModel : ViewModel() {
     private fun startSimulation() {
         viewModelScope.launch {
             while (true) {
-                delay(3000) // Cada 3 segundos
+                delay(3000)
                 _sensorData.value = SensorData(
-                    temperatura = 18f + Random.nextFloat() * 10f,   // 18-28 °C
-                    humedad = 40f + Random.nextFloat() * 30f,       // 40-70 %
-                    co2 = 400 + Random.nextInt(1100),               // 400-1500 ppm
+                    temperatura = 18f + Random.nextFloat() * 10f,
+                    humedad = 40f + Random.nextFloat() * 30f,
+                    co2 = 400 + Random.nextInt(1100),
                     timestamp = System.currentTimeMillis()
                 )
             }
