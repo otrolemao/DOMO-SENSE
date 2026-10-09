@@ -15,6 +15,9 @@ class MainViewModel : ViewModel() {
     private val _sensorData = MutableStateFlow(SensorData())
     val sensorData: StateFlow<SensorData> = _sensorData.asStateFlow()
 
+    private val _history = MutableStateFlow<List<SensorData>>(emptyList())
+    val history: StateFlow<List<SensorData>> = _history.asStateFlow()
+
     private val _isConnected = MutableStateFlow(true)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
@@ -24,16 +27,29 @@ class MainViewModel : ViewModel() {
 
     private fun startSimulation() {
         viewModelScope.launch {
+            // Historial inicial de 30 muestras para que se vea el gráfico
+            repeat(30) {
+                delay(100)
+                addReading()
+            }
+            // Luego, cada 3 segundos, agregamos una nueva lectura
             while (true) {
                 delay(3000)
-                _sensorData.value = SensorData(
-                    temperatura = 18f + Random.nextFloat() * 10f,
-                    humedad = 40f + Random.nextFloat() * 30f,
-                    co2 = 400 + Random.nextInt(1100),
-                    timestamp = System.currentTimeMillis()
-                )
+                addReading()
             }
         }
+    }
+
+    private fun addReading() {
+        val newData = SensorData(
+            temperatura = 18f + Random.nextFloat() * 10f,
+            humedad = 40f + Random.nextFloat() * 30f,
+            co2 = 400 + Random.nextInt(1100),
+            timestamp = System.currentTimeMillis()
+        )
+        _sensorData.value = newData
+        // Mantener solo las últimas 50 lecturas
+        _history.value = (_history.value + newData).takeLast(50)
     }
 
     fun toggleConnection() {
