@@ -1,5 +1,6 @@
 package com.example.domosense.ui.screens
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -13,11 +14,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 
 sealed class BottomNavItem(
     val route: String,
@@ -31,22 +35,37 @@ sealed class BottomNavItem(
 
 @Composable
 fun MainScreen() {
+    val navController = rememberNavController()
     val items = listOf(
         BottomNavItem.Dashboard,
         BottomNavItem.History,
         BottomNavItem.Settings
     )
-    var selectedIndex by remember { mutableStateOf(0) }
 
     Scaffold(
         bottomBar = {
             NavigationBar(
                 containerColor = MaterialTheme.colorScheme.surface
             ) {
-                items.forEachIndexed { index, item ->
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+
+                items.forEach { item ->
+                    val selected = currentDestination?.hierarchy?.any {
+                        it.route == item.route
+                    } == true
+
                     NavigationBarItem(
-                        selected = selectedIndex == index,
-                        onClick = { selectedIndex = index },
+                        selected = selected,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                         icon = {
                             Icon(
                                 imageVector = item.icon,
@@ -59,10 +78,22 @@ fun MainScreen() {
             }
         }
     ) { innerPadding ->
-        when (selectedIndex) {
-            0 -> DashboardScreen(modifier = Modifier.padding(innerPadding))
-            1 -> HistoryScreen(modifier = Modifier.padding(innerPadding))
-            2 -> SettingsScreen(modifier = Modifier.padding(innerPadding))
+        NavHost(
+            navController = navController,
+            startDestination = BottomNavItem.Dashboard.route,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            composable(BottomNavItem.Dashboard.route) {
+                DashboardScreen()
+            }
+            composable(BottomNavItem.History.route) {
+                HistoryScreen()
+            }
+            composable(BottomNavItem.Settings.route) {
+                SettingsScreen()
+            }
         }
     }
 }
