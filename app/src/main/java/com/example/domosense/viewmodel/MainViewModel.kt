@@ -10,6 +10,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
+data class Settings(
+    val co2Max: Float = 1000f,
+    val tempMin: Float = 18f,
+    val tempMax: Float = 28f,
+    val humMin: Float = 30f,
+    val humMax: Float = 70f,
+    val notifPush: Boolean = true,
+    val sonidoAlerta: Boolean = true,
+    val modoNoMolestar: Boolean = false,
+    val usarFahrenheit: Boolean = false
+)
+
 class MainViewModel : ViewModel() {
 
     private val _sensorData = MutableStateFlow(SensorData())
@@ -21,18 +33,19 @@ class MainViewModel : ViewModel() {
     private val _isConnected = MutableStateFlow(true)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
+    private val _settings = MutableStateFlow(Settings())
+    val settings: StateFlow<Settings> = _settings.asStateFlow()
+
     init {
         startSimulation()
     }
 
     private fun startSimulation() {
         viewModelScope.launch {
-            // Historial inicial de 30 muestras para que se vea el gráfico
             repeat(30) {
                 delay(100)
                 addReading()
             }
-            // Luego, cada 3 segundos, agregamos una nueva lectura
             while (true) {
                 delay(3000)
                 addReading()
@@ -48,8 +61,45 @@ class MainViewModel : ViewModel() {
             timestamp = System.currentTimeMillis()
         )
         _sensorData.value = newData
-        // Mantener solo las últimas 50 lecturas
         _history.value = (_history.value + newData).takeLast(50)
+    }
+
+    // ========== Actualizadores de Settings ==========
+
+    fun updateCo2Max(value: Float) {
+        _settings.value = _settings.value.copy(co2Max = value)
+    }
+
+    fun updateTempMin(value: Float) {
+        _settings.value = _settings.value.copy(tempMin = value)
+    }
+
+    fun updateTempMax(value: Float) {
+        _settings.value = _settings.value.copy(tempMax = value)
+    }
+
+    fun updateHumMin(value: Float) {
+        _settings.value = _settings.value.copy(humMin = value)
+    }
+
+    fun updateHumMax(value: Float) {
+        _settings.value = _settings.value.copy(humMax = value)
+    }
+
+    fun updateNotifPush(value: Boolean) {
+        _settings.value = _settings.value.copy(notifPush = value)
+    }
+
+    fun updateSonidoAlerta(value: Boolean) {
+        _settings.value = _settings.value.copy(sonidoAlerta = value)
+    }
+
+    fun updateModoNoMolestar(value: Boolean) {
+        _settings.value = _settings.value.copy(modoNoMolestar = value)
+    }
+
+    fun updateUsarFahrenheit(value: Boolean) {
+        _settings.value = _settings.value.copy(usarFahrenheit = value)
     }
 
     fun toggleConnection() {
