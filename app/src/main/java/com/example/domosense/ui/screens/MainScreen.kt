@@ -16,12 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.domosense.viewmodel.MainViewModel
 
 sealed class BottomNavItem(
     val route: String,
@@ -41,6 +43,9 @@ fun MainScreen() {
         BottomNavItem.History,
         BottomNavItem.Settings
     )
+
+    // ViewModel compartido entre todas las pantallas
+    val sharedViewModel: MainViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
@@ -86,13 +91,13 @@ fun MainScreen() {
                 .padding(innerPadding)
         ) {
             composable(BottomNavItem.Dashboard.route) {
-                DashboardScreen()
+                DashboardScreen(viewModel = sharedViewModel)
             }
             composable(BottomNavItem.History.route) {
-                HistoryScreen()
+                HistoryScreen(viewModel = sharedViewModel)
             }
             composable(BottomNavItem.Settings.route) {
-                SettingsScreen()
+                SettingsScreen(viewModel = sharedViewModel)
             }
         }
     }

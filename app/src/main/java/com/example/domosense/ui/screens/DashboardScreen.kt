@@ -20,11 +20,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.domosense.data.models.AirQuality
+import com.example.domosense.ui.components.EmptyState
+import com.example.domosense.ui.components.ErrorState
+import com.example.domosense.ui.components.LoadingState
 import com.example.domosense.ui.components.SensorCard
 import com.example.domosense.ui.theme.DangerOrange
 import com.example.domosense.ui.theme.DangerRed
 import com.example.domosense.ui.theme.WarningYellow
 import com.example.domosense.viewmodel.MainViewModel
+import com.example.domosense.viewmodel.UiState
 import java.util.Locale
 
 @Composable
@@ -32,8 +36,40 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = viewModel()
 ) {
-    val data by viewModel.sensorData.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        when (val state = uiState) {
+            is UiState.Loading -> {
+                LoadingState(mensaje = "Conectando con DOMO SENSE...")
+            }
+            is UiState.Error -> {
+                ErrorState(
+                    mensaje = state.mensaje,
+                    onRetry = { viewModel.retry() }
+                )
+            }
+            is UiState.Empty -> {
+                EmptyState(
+                    onAction = { viewModel.retry() }
+                )
+            }
+            is UiState.Success -> {
+                DashboardContent(data = state.data)
+            }
+        }
+    }
+}
+
+@Composable
+fun DashboardContent(
+    data: com.example.domosense.data.models.SensorData,
+    modifier: Modifier = Modifier
+) {
     val calidad = AirQuality.fromCO2(data.co2)
     val colorCO2 = when (calidad) {
         AirQuality.OPTIMO -> Color(0xFF00C853)
@@ -45,7 +81,6 @@ fun DashboardScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top

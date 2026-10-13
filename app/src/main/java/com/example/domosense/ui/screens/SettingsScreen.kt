@@ -152,7 +152,42 @@ fun SettingsScreen(
                 }
             }
         }
+        // ===== MODO SIMULACIÓN (solo para demo) =====
+        SettingsSection(titulo = "🧪 MODO SIMULACIÓN (DEMO)") {
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Fuerza un estado para la demo",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
 
+                    com.example.domosense.viewmodel.SimulationMode.entries.forEach { mode ->
+                        FilterChip(
+                            selected = settings.simulationMode == mode,
+                            onClick = { viewModel.updateSimulationMode(mode) },
+                            label = { Text(mode.label, fontSize = 12.sp) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = Color.Black
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+        }
         // ===== PERSONALIZACIÓN =====
         SettingsSection(titulo = "🎨 PERSONALIZACIÓN") {
             Card(
