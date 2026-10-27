@@ -25,57 +25,39 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.domosense.viewmodel.MainViewModel
 
-sealed class BottomNavItem(
-    val route: String,
-    val label: String,
-    val icon: ImageVector
-) {
+sealed class BottomNavItem(val route: String, val label: String, val icon: ImageVector) {
     object Dashboard : BottomNavItem("dashboard", "Dashboard", Icons.Default.Home)
     object History : BottomNavItem("history", "Historial", Icons.Default.DateRange)
     object Settings : BottomNavItem("settings", "Ajustes", Icons.Default.Settings)
 }
 
 @Composable
-fun MainScreen(isGuest: Boolean = false, onCerrarSesion: () -> Unit = {}) {
+fun MainScreen(
+    isGuest: Boolean = false,
+    onCerrarSession: () -> Unit = {}
+) {
     val navController = rememberNavController()
-    val items = listOf(
-        BottomNavItem.Dashboard,
-        BottomNavItem.History,
-        BottomNavItem.Settings
-    )
-
+    val items = listOf(BottomNavItem.Dashboard, BottomNavItem.History, BottomNavItem.Settings)
     val sharedViewModel: MainViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface
-            ) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
 
                 items.forEach { item ->
-                    val selected = currentDestination?.hierarchy?.any {
-                        it.route == item.route
-                    } == true
-
+                    val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
                             navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
                             }
                         },
-                        icon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.label
-                            )
-                        },
+                        icon = { Icon(imageVector = item.icon, contentDescription = item.label) },
                         label = { Text(item.label) }
                     )
                 }
@@ -85,18 +67,16 @@ fun MainScreen(isGuest: Boolean = false, onCerrarSesion: () -> Unit = {}) {
         NavHost(
             navController = navController,
             startDestination = BottomNavItem.Dashboard.route,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+            modifier = Modifier.fillMaxSize().padding(innerPadding)
         ) {
             composable(BottomNavItem.Dashboard.route) {
                 DashboardScreen(viewModel = sharedViewModel, isGuest = isGuest)
             }
             composable(BottomNavItem.History.route) {
-                HistoryScreen(viewModel = sharedViewModel, isGuest = isGuest, onCerrarSesion = onCerrarSesion)
+                HistoryScreen(viewModel = sharedViewModel, isGuest = isGuest, onCerrarSession = onCerrarSession)
             }
             composable(BottomNavItem.Settings.route) {
-                SettingsScreen(viewModel = sharedViewModel, isGuest = isGuest, onCerrarSesion = onCerrarSesion)
+                SettingsScreen(viewModel = sharedViewModel, isGuest = isGuest, onCerrarSession = onCerrarSession)
             }
         }
     }

@@ -3,6 +3,7 @@ package com.example.domosense.ui.screens
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,19 +42,19 @@ import com.example.domosense.ui.theme.WarningYellow
 import com.example.domosense.viewmodel.MainViewModel
 import java.util.Locale
 
-enum class TimeRange(val label: String) {
-    HOY("Hoy"),
-    SEMANA("Semana"),
-    MES("Mes")
-}
+enum class TimeRange(val label: String) { HOY("Hoy"), SEMANA("Semana"), MES("Mes") }
 
 @Composable
 fun HistoryScreen(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = viewModel(),
     isGuest: Boolean = false,
-    onCerrarSesion: () -> Unit = {}
+    onCerrarSession: () -> Unit = {}
 ) {
+    val history by viewModel.history.collectAsState()
+    val context = LocalContext.current
+    var selectedRange by remember { mutableStateOf(TimeRange.HOY) }
+
     if (isGuest) {
         Column(
             modifier = modifier.fillMaxSize().padding(32.dp),
@@ -62,240 +63,85 @@ fun HistoryScreen(
         ) {
             Text("🔒", fontSize = 64.sp)
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Función exclusiva para usuarios registrados",
-                textAlign = TextAlign.Center,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            Text("Función exclusiva para usuarios registrados", textAlign = TextAlign.Center, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(24.dp))
-            Button(onClick = onCerrarSesion) {
+            Button(onClick = onCerrarSession) {
                 Text("Iniciar sesión")
             }
         }
         return
     }
 
-    val history by viewModel.history.collectAsState()
-    val context = LocalContext.current
-    var selectedRange by remember { mutableStateOf(TimeRange.HOY) }
-
     val temperaturas = history.map { it.temperatura }
     val humedades = history.map { it.humedad }
     val co2List = history.map { it.co2.toFloat() }
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+        modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "HISTORIAL",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Text(
-            text = "${history.size} muestras registradas",
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-        )
-
+        Text(text = "HISTORIAL", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Text(text = "${history.size} muestras registradas", fontSize = 12.sp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TimeRange.entries.forEach { range ->
                 FilterChip(
                     selected = selectedRange == range,
                     onClick = { selectedRange = range },
                     label = { Text(range.label) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                        selectedLabelColor = Color.Black
-                    ),
+                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = Color.Black),
                     modifier = Modifier.weight(1f)
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        LineChart(
-            data = temperaturas,
-            lineColor = MaterialTheme.colorScheme.primary,
-            label = "TEMPERATURA",
-            unit = "°C"
-        )
-
+        LineChart(data = temperaturas, lineColor = MaterialTheme.colorScheme.primary, label = "TEMPERATURA", unit = "°C")
         Spacer(modifier = Modifier.height(12.dp))
-
-        LineChart(
-            data = humedades,
-            lineColor = MaterialTheme.colorScheme.secondary,
-            label = "HUMEDAD",
-            unit = "%"
-        )
-
+        LineChart(data = humedades, lineColor = MaterialTheme.colorScheme.secondary, label = "HUMEDAD", unit = "%")
         Spacer(modifier = Modifier.height(12.dp))
-
-        LineChart(
-            data = co2List,
-            lineColor = WarningYellow,
-            label = "CO2",
-            unit = "ppm"
-        )
-
+        LineChart(data = co2List, lineColor = WarningYellow, label = "CO2", unit = "ppm")
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "ESTADÍSTICAS",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.fillMaxWidth()
-        )
-
+        Text(text = "ESTADÍSTICAS", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(12.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatCard(
-                titulo = "TEMP. PROM.",
-                valor = if (temperaturas.isNotEmpty())
-                    String.format(Locale.US, "%.1f °C", temperaturas.average())
-                else "--",
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.weight(1f)
-            )
-            StatCard(
-                titulo = "TEMP. MÁX.",
-                valor = if (temperaturas.isNotEmpty())
-                    String.format(Locale.US, "%.1f °C", temperaturas.max())
-                else "--",
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.weight(1f)
-            )
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            StatCard(titulo = "TEMP. PROM.", valor = if (temperaturas.isNotEmpty()) String.format(Locale.US, "%.1f °C", temperaturas.average()) else "--", color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+            StatCard(titulo = "TEMP. MÁX.", valor = if (temperaturas.isNotEmpty()) String.format(Locale.US, "%.1f °C", temperaturas.max()) else "--", color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
         }
-
         Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatCard(
-                titulo = "HUM. PROM.",
-                valor = if (humedades.isNotEmpty())
-                    String.format(Locale.US, "%.1f %%", humedades.average())
-                else "--",
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.weight(1f)
-            )
-            StatCard(
-                titulo = "HUM. MÁX.",
-                valor = if (humedades.isNotEmpty())
-                    String.format(Locale.US, "%.1f %%", humedades.max())
-                else "--",
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.weight(1f)
-            )
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            StatCard(titulo = "HUM. PROM.", valor = if (humedades.isNotEmpty()) String.format(Locale.US, "%.1f %%", humedades.average()) else "--", color = MaterialTheme.colorScheme.secondary, modifier = Modifier.weight(1f))
+            StatCard(titulo = "HUM. MÁX.", valor = if (humedades.isNotEmpty()) String.format(Locale.US, "%.1f %%", humedades.max()) else "--", color = MaterialTheme.colorScheme.secondary, modifier = Modifier.weight(1f))
         }
-
         Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatCard(
-                titulo = "CO2 PROM.",
-                valor = if (co2List.isNotEmpty())
-                    String.format(Locale.US, "%.0f ppm", co2List.average())
-                else "--",
-                color = WarningYellow,
-                modifier = Modifier.weight(1f)
-            )
-            StatCard(
-                titulo = "CO2 MÁX.",
-                valor = if (co2List.isNotEmpty())
-                    String.format(Locale.US, "%.0f ppm", co2List.max())
-                else "--",
-                color = WarningYellow,
-                modifier = Modifier.weight(1f)
-            )
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            StatCard(titulo = "CO2 PROM.", valor = if (co2List.isNotEmpty()) String.format(Locale.US, "%.0f ppm", co2List.average()) else "--", color = WarningYellow, modifier = Modifier.weight(1f))
+            StatCard(titulo = "CO2 MÁX.", valor = if (co2List.isNotEmpty()) String.format(Locale.US, "%.0f ppm", co2List.max()) else "--", color = WarningYellow, modifier = Modifier.weight(1f))
         }
-
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = {
-                Toast.makeText(
-                    context,
-                    "Función de exportación próximamente",
-                    Toast.LENGTH_SHORT
-                ).show()
-            },
+            onClick = { Toast.makeText(context, "Función de exportación próximamente", Toast.LENGTH_SHORT).show() },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.Black
-            )
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = Color.Black)
         ) {
-            Text(
-                text = "📥  Exportar datos",
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
-            )
+            Text(text = "📥 Exportar datos", fontWeight = FontWeight.Bold, fontSize = 14.sp)
         }
-
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
 @Composable
-fun StatCard(
-    titulo: String,
-    valor: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Text(
-                text = titulo,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
+fun StatCard(titulo: String, valor: String, color: Color, modifier: Modifier = Modifier) {
+    Card(modifier = modifier, shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+            Text(text = titulo, fontSize = 10.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = valor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = color
-            )
+            Text(text = valor, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = color)
         }
     }
 }

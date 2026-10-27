@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -26,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,168 +41,48 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = viewModel(),
     isGuest: Boolean = false,
-    onCerrarSesion: () -> Unit = {}
+    onCerrarSession: () -> Unit = {}
 ) {
-    if (isGuest) {
-        Column(
-            modifier = modifier.fillMaxSize().padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text("🔒", fontSize = 64.sp)
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Función exclusiva para usuarios registrados",
-                textAlign = TextAlign.Center,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(onClick = onCerrarSesion) {
-                Text("Iniciar sesión")
-            }
-        }
-        return
-    }
-
     val settings by viewModel.settings.collectAsState()
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+        modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "AJUSTES",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Text(
-            text = "Personaliza tu experiencia",
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-        )
+        Text(text = "AJUSTES", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxWidth())
+        Text(text = "Personaliza tu experiencia", fontSize = 12.sp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
 
         SettingsSection(titulo = "🚨 UMBRALES DE ALERTA") {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    SliderSetting(
-                        titulo = "CO2 máximo",
-                        valor = settings.co2Max,
-                        onValueChange = { viewModel.updateCo2Max(it) },
-                        valueRange = 600f..5000f,
-                        unidad = "ppm"
-                    )
-                    SliderSetting(
-                        titulo = "Temperatura mínima",
-                        valor = settings.tempMin,
-                        onValueChange = { viewModel.updateTempMin(it) },
-                        valueRange = 5f..25f,
-                        unidad = "°C"
-                    )
-                    SliderSetting(
-                        titulo = "Temperatura máxima",
-                        valor = settings.tempMax,
-                        onValueChange = { viewModel.updateTempMax(it) },
-                        valueRange = 20f..40f,
-                        unidad = "°C"
-                    )
-                    SliderSetting(
-                        titulo = "Humedad mínima",
-                        valor = settings.humMin,
-                        onValueChange = { viewModel.updateHumMin(it) },
-                        valueRange = 10f..50f,
-                        unidad = "%"
-                    )
-                    SliderSetting(
-                        titulo = "Humedad máxima",
-                        valor = settings.humMax,
-                        onValueChange = { viewModel.updateHumMax(it) },
-                        valueRange = 50f..90f,
-                        unidad = "%"
-                    )
+            Card(shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SliderSetting(titulo = "CO2 máximo", valor = settings.co2Max, onValueChange = { viewModel.updateCo2Max(it) }, valueRange = 600f..5000f, unidad = "ppm")
+                    SliderSetting(titulo = "Temperatura mínima", valor = settings.tempMin, onValueChange = { viewModel.updateTempMin(it) }, valueRange = 5f..25f, unidad = "°C")
+                    SliderSetting(titulo = "Temperatura máxima", valor = settings.tempMax, onValueChange = { viewModel.updateTempMax(it) }, valueRange = 20f..40f, unidad = "°C")
+                    SliderSetting(titulo = "Humedad mínima", valor = settings.humMin, onValueChange = { viewModel.updateHumMin(it) }, valueRange = 10f..50f, unidad = "%")
+                    SliderSetting(titulo = "Humedad máxima", valor = settings.humMax, onValueChange = { viewModel.updateHumMax(it) }, valueRange = 50f..90f, unidad = "%")
                 }
             }
         }
 
         SettingsSection(titulo = "🔔 NOTIFICACIONES") {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    SwitchSetting(
-                        titulo = "Notificaciones push",
-                        checked = settings.notifPush,
-                        onCheckedChange = { viewModel.updateNotifPush(it) }
-                    )
-                    SwitchSetting(
-                        titulo = "Sonido de alerta",
-                        checked = settings.sonidoAlerta,
-                        onCheckedChange = { viewModel.updateSonidoAlerta(it) }
-                    )
-                    SwitchSetting(
-                        titulo = "Modo no molestar",
-                        checked = settings.modoNoMolestar,
-                        onCheckedChange = { viewModel.updateModoNoMolestar(it) }
-                    )
+            Card(shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SwitchSetting(titulo = "Notificaciones push", checked = settings.notifPush, onCheckedChange = { viewModel.updateNotifPush(it) })
+                    SwitchSetting(titulo = "Sonido de alerta", checked = settings.sonidoAlerta, onCheckedChange = { viewModel.updateSonidoAlerta(it) })
+                    SwitchSetting(titulo = "Modo no molestar", checked = settings.modoNoMolestar, onCheckedChange = { viewModel.updateModoNoMolestar(it) })
                 }
             }
         }
 
         SettingsSection(titulo = "🧪 MODO SIMULACIÓN (DEMO)") {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Fuerza un estado para la demo",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-
+            Card(shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     SimulationMode.entries.forEach { mode ->
                         FilterChip(
                             selected = settings.simulationMode == mode,
                             onClick = { viewModel.updateSimulationMode(mode) },
                             label = { Text(mode.label, fontSize = 12.sp) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                selectedLabelColor = Color.Black
-                            ),
+                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = Color.Black),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -211,93 +91,43 @@ fun SettingsScreen(
         }
 
         SettingsSection(titulo = "🎨 PERSONALIZACIÓN") {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Unidades de temperatura",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        FilterChip(
-                            selected = !settings.usarFahrenheit,
-                            onClick = { viewModel.updateUsarFahrenheit(false) },
-                            label = { Text("Celsius °C") },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                selectedLabelColor = Color.Black
-                            ),
-                            modifier = Modifier.weight(1f)
-                        )
-                        FilterChip(
-                            selected = settings.usarFahrenheit,
-                            onClick = { viewModel.updateUsarFahrenheit(true) },
-                            label = { Text("Fahrenheit °F") },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                selectedLabelColor = Color.Black
-                            ),
-                            modifier = Modifier.weight(1f)
-                        )
+            Card(shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(selected = !settings.usarFahrenheit, onClick = { viewModel.updateUsarFahrenheit(false) }, label = { Text("Celsius °C") }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = Color.Black), modifier = Modifier.weight(1f))
+                        FilterChip(selected = settings.usarFahrenheit, onClick = { viewModel.updateUsarFahrenheit(true) }, label = { Text("Fahrenheit °F") }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = Color.Black), modifier = Modifier.weight(1f))
                     }
                 }
             }
         }
 
         SettingsSection(titulo = "ℹ️ INFORMACIÓN") {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+            Card(shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     InfoRow(titulo = "Versión", valor = "1.0.0")
                     InfoRow(titulo = "Dispositivo", valor = "DOMO SENSE-01")
-                    InfoRow(titulo = "Estado", valor = "🟢 Conectado")
+                    InfoRow(titulo = "Estado", valor = if (isGuest) "🟡 Invitado" else "🟢 Conectado")
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+        Button(
+            onClick = onCerrarSession,
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = if (isGuest) MaterialTheme.colorScheme.primary else Color(0xFFD32F2F), contentColor = if (isGuest) Color.Black else Color.White)
+        ) {
+            Text(text = if (isGuest) "INICIAR SESIÓN COMO ADMIN" else "CERRAR SESIÓN", fontWeight = FontWeight.Bold)
+        }
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
 @Composable
 fun InfoRow(titulo: String, valor: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = titulo,
-            fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-        )
-        Text(
-            text = valor,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Text(text = titulo, fontSize = 13.sp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
+        Text(text = valor, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onBackground)
     }
 }

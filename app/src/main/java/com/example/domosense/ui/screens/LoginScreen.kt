@@ -39,6 +39,11 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Credenciales válidas
+    val validEmail = "DomoSense@ownerapp.com"
+    val validPassword = "DOMOSENSE123"
 
     Column(
         modifier = modifier
@@ -64,27 +69,45 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                errorMessage = null // Limpiar error al escribir
+            },
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            isError = errorMessage != null
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                errorMessage = null // Limpiar error al escribir
+            },
             label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            isError = errorMessage != null
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Mensaje de error si las credenciales fallan
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
         TextButton(
-            onClick = { },
+            onClick = { /* Recuperación de contraseña (futuro) */ },
             modifier = Modifier.align(Alignment.End)
         ) {
             Text("¿Olvidaste tu contraseña?", fontSize = 12.sp)
@@ -93,7 +116,13 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = onLoginSuccess,
+            onClick = {
+                if (email == validEmail && password == validPassword) {
+                    onLoginSuccess()
+                } else {
+                    errorMessage = "Correo o contraseña incorrectos"
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -112,13 +141,19 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f))
+            HorizontalDivider(
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
+            )
             Text(
-                text = "  O  ",
+                text = " O ",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
             )
-            HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f))
+            HorizontalDivider(
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))

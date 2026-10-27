@@ -14,10 +14,11 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = "domo_sense_prefs"
 )
 
+// Enum para el tipo de sesion
 enum class SessionType {
-    NONE,
-    GUEST,
-    REGISTERED
+    NONE,       // No ha iniciado sesion
+    GUEST,      // Entro como invitado
+    REGISTERED  // Inicio sesion con cuenta
 }
 
 class UserPreferences(private val context: Context) {
@@ -32,6 +33,7 @@ class UserPreferences(private val context: Context) {
             preferences[ONBOARDING_COMPLETADO] ?: false
         }
 
+    // Flow que emite el tipo de sesion actual
     val sessionType: Flow<SessionType> = context.dataStore.data
         .map { preferences ->
             val value = preferences[SESSION_TYPE] ?: SessionType.NONE.name
@@ -44,13 +46,14 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun guardarSesion(type: SessionType) {
+    // --- ESTAS SON LAS FUNCIONES QUE FALTABAN ---
+    suspend fun guardarSession(type: SessionType) {
         context.dataStore.edit { preferences ->
             preferences[SESSION_TYPE] = type.name
         }
     }
 
-    suspend fun cerrarSesion() {
+    suspend fun cerrarSession() {
         context.dataStore.edit { preferences ->
             preferences[SESSION_TYPE] = SessionType.NONE.name
         }

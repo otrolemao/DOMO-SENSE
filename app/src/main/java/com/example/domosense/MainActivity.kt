@@ -57,7 +57,7 @@ fun DOMOSENSEApp() {
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { }
+    ) { _ -> }
 
     LaunchedEffect(key1 = sessionType) {
         if (sessionType != SessionType.NONE && sessionType != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -75,27 +75,19 @@ fun DOMOSENSEApp() {
     when {
         onboardingCompletado == false -> {
             OnboardingScreen(
-                onFinish = {
-                    scope.launch { userPreferences.marcarOnboardingCompletado() }
-                }
+                onFinish = { scope.launch { userPreferences.marcarOnboardingCompletado() } }
             )
         }
         sessionType == SessionType.NONE -> {
             LoginScreen(
-                onLoginSuccess = {
-                    scope.launch { userPreferences.guardarSesion(SessionType.REGISTERED) }
-                },
-                onGuestLogin = {
-                    scope.launch { userPreferences.guardarSesion(SessionType.GUEST) }
-                }
+                onLoginSuccess = { scope.launch { userPreferences.guardarSession(SessionType.REGISTERED) } },
+                onGuestLogin = { scope.launch { userPreferences.guardarSession(SessionType.GUEST) } }
             )
         }
         else -> {
             MainScreen(
                 isGuest = sessionType == SessionType.GUEST,
-                onCerrarSesion = {
-                    scope.launch { userPreferences.cerrarSesion() }
-                }
+                onCerrarSession = { scope.launch { userPreferences.cerrarSession() } }
             )
         }
     }
