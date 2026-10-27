@@ -36,7 +36,7 @@ sealed class BottomNavItem(
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(isGuest: Boolean = false, onCerrarSesion: () -> Unit = {}) {
     val navController = rememberNavController()
     val items = listOf(
         BottomNavItem.Dashboard,
@@ -44,7 +44,6 @@ fun MainScreen() {
         BottomNavItem.Settings
     )
 
-    // ViewModel compartido entre todas las pantallas
     val sharedViewModel: MainViewModel = viewModel()
 
     Scaffold(
@@ -91,13 +90,13 @@ fun MainScreen() {
                 .padding(innerPadding)
         ) {
             composable(BottomNavItem.Dashboard.route) {
-                DashboardScreen(viewModel = sharedViewModel)
+                DashboardScreen(viewModel = sharedViewModel, isGuest = isGuest)
             }
             composable(BottomNavItem.History.route) {
-                HistoryScreen(viewModel = sharedViewModel)
+                HistoryScreen(viewModel = sharedViewModel, isGuest = isGuest, onCerrarSesion = onCerrarSesion)
             }
             composable(BottomNavItem.Settings.route) {
-                SettingsScreen(viewModel = sharedViewModel)
+                SettingsScreen(viewModel = sharedViewModel, isGuest = isGuest, onCerrarSesion = onCerrarSesion)
             }
         }
     }

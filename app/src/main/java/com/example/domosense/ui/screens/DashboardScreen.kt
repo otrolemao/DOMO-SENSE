@@ -34,7 +34,8 @@ import java.util.Locale
 @Composable
 fun DashboardScreen(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel = viewModel(),
+    isGuest: Boolean = false
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -43,6 +44,15 @@ fun DashboardScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        if (isGuest) {
+            Text(
+                text = "⚠️ Modo Invitado: funciones limitadas",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
+            )
+        }
+
         when (val state = uiState) {
             is UiState.Loading -> {
                 LoadingState(mensaje = "Conectando con DOMO SENSE...")

@@ -32,12 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.domosense.ui.charts.LineChart
-import com.example.domosense.ui.theme.DangerOrange
-import com.example.domosense.ui.theme.DangerRed
 import com.example.domosense.ui.theme.WarningYellow
 import com.example.domosense.viewmodel.MainViewModel
 import java.util.Locale
@@ -51,13 +50,36 @@ enum class TimeRange(val label: String) {
 @Composable
 fun HistoryScreen(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel = viewModel(),
+    isGuest: Boolean = false,
+    onCerrarSesion: () -> Unit = {}
 ) {
+    if (isGuest) {
+        Column(
+            modifier = modifier.fillMaxSize().padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("🔒", fontSize = 64.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Función exclusiva para usuarios registrados",
+                textAlign = TextAlign.Center,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(onClick = onCerrarSesion) {
+                Text("Iniciar sesión")
+            }
+        }
+        return
+    }
+
     val history by viewModel.history.collectAsState()
     val context = LocalContext.current
     var selectedRange by remember { mutableStateOf(TimeRange.HOY) }
 
-    // Extraer las listas de valores para el gráfico
     val temperaturas = history.map { it.temperatura }
     val humedades = history.map { it.humedad }
     val co2List = history.map { it.co2.toFloat() }
@@ -72,7 +94,6 @@ fun HistoryScreen(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Título
         Text(
             text = "HISTORIAL",
             fontSize = 24.sp,
@@ -88,7 +109,6 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Tabs de rango de tiempo
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -109,7 +129,6 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Gráfico de temperatura
         LineChart(
             data = temperaturas,
             lineColor = MaterialTheme.colorScheme.primary,
@@ -119,7 +138,6 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Gráfico de humedad
         LineChart(
             data = humedades,
             lineColor = MaterialTheme.colorScheme.secondary,
@@ -129,7 +147,6 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Gráfico de CO2
         LineChart(
             data = co2List,
             lineColor = WarningYellow,
@@ -139,7 +156,6 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Sección de estadísticas
         Text(
             text = "ESTADÍSTICAS",
             fontSize = 14.sp,
@@ -150,7 +166,6 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Fila 1: Temperatura
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -175,7 +190,6 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Fila 2: Humedad
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -200,7 +214,6 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Fila 3: CO2
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -225,7 +238,6 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón de exportar
         Button(
             onClick = {
                 Toast.makeText(

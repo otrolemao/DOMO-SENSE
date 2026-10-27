@@ -1,6 +1,5 @@
 package com.example.domosense.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -25,8 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,14 +34,38 @@ import com.example.domosense.ui.components.SettingsSection
 import com.example.domosense.ui.components.SliderSetting
 import com.example.domosense.ui.components.SwitchSetting
 import com.example.domosense.viewmodel.MainViewModel
+import com.example.domosense.viewmodel.SimulationMode
 
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel = viewModel(),
+    isGuest: Boolean = false,
+    onCerrarSesion: () -> Unit = {}
 ) {
+    if (isGuest) {
+        Column(
+            modifier = modifier.fillMaxSize().padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("🔒", fontSize = 64.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Función exclusiva para usuarios registrados",
+                textAlign = TextAlign.Center,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(onClick = onCerrarSesion) {
+                Text("Iniciar sesión")
+            }
+        }
+        return
+    }
+
     val settings by viewModel.settings.collectAsState()
-    val context = LocalContext.current
 
     Column(
         modifier = modifier
@@ -52,7 +76,6 @@ fun SettingsScreen(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Título
         Text(
             text = "AJUSTES",
             fontSize = 24.sp,
@@ -67,7 +90,6 @@ fun SettingsScreen(
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
         )
 
-        // ===== UMBRALES DE ALERTA =====
         SettingsSection(titulo = "🚨 UMBRALES DE ALERTA") {
             Card(
                 shape = RoundedCornerShape(12.dp),
@@ -120,7 +142,6 @@ fun SettingsScreen(
             }
         }
 
-        // ===== NOTIFICACIONES =====
         SettingsSection(titulo = "🔔 NOTIFICACIONES") {
             Card(
                 shape = RoundedCornerShape(12.dp),
@@ -152,7 +173,7 @@ fun SettingsScreen(
                 }
             }
         }
-        // ===== MODO SIMULACIÓN (solo para demo) =====
+
         SettingsSection(titulo = "🧪 MODO SIMULACIÓN (DEMO)") {
             Card(
                 shape = RoundedCornerShape(12.dp),
@@ -173,7 +194,7 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    com.example.domosense.viewmodel.SimulationMode.entries.forEach { mode ->
+                    SimulationMode.entries.forEach { mode ->
                         FilterChip(
                             selected = settings.simulationMode == mode,
                             onClick = { viewModel.updateSimulationMode(mode) },
@@ -188,7 +209,7 @@ fun SettingsScreen(
                 }
             }
         }
-        // ===== PERSONALIZACIÓN =====
+
         SettingsSection(titulo = "🎨 PERSONALIZACIÓN") {
             Card(
                 shape = RoundedCornerShape(12.dp),
@@ -236,7 +257,6 @@ fun SettingsScreen(
             }
         }
 
-        // ===== INFORMACIÓN =====
         SettingsSection(titulo = "ℹ️ INFORMACIÓN") {
             Card(
                 shape = RoundedCornerShape(12.dp),
@@ -252,10 +272,7 @@ fun SettingsScreen(
                 ) {
                     InfoRow(titulo = "Versión", valor = "1.0.0")
                     InfoRow(titulo = "Dispositivo", valor = "DOMO SENSE-01")
-                    InfoRow(
-                        titulo = "Estado",
-                        valor = "🟢 Conectado"
-                    )
+                    InfoRow(titulo = "Estado", valor = "🟢 Conectado")
                 }
             }
         }

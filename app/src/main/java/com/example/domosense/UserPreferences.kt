@@ -5,31 +5,54 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-// Extensión para acceder al DataStore desde cualquier Context
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = "domo_sense_prefs"
 )
+
+enum class SessionType {
+    NONE,
+    GUEST,
+    REGISTERED
+}
 
 class UserPreferences(private val context: Context) {
 
     companion object {
         private val ONBOARDING_COMPLETADO = booleanPreferencesKey("onboarding_completado")
+        private val SESSION_TYPE = stringPreferencesKey("session_type")
     }
 
-    // Flow que emite true/false según si el onboarding ya se completó
     val onboardingCompletado: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[ONBOARDING_COMPLETADO] ?: false
         }
 
-    // Marcar el onboarding como completado
+    val sessionType: Flow<SessionType> = context.dataStore.data
+        .map { preferences ->
+            val value = preferences[SESSION_TYPE] ?: SessionType.NONE.name
+            SessionType.valueOf(value)
+        }
+
     suspend fun marcarOnboardingCompletado() {
         context.dataStore.edit { preferences ->
             preferences[ONBOARDING_COMPLETADO] = true
+        }
+    }
+
+    suspend fun guardarSesion(type: SessionType) {
+        context.dataStore.edit { preferences ->
+            preferences[SESSION_TYPE] = type.name
+        }
+    }
+
+    suspend fun cerrarSesion() {
+        context.dataStore.edit { preferences ->
+            preferences[SESSION_TYPE] = SessionType.NONE.name
         }
     }
 }
